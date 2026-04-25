@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1,
+    "name": "Maggi",
+    "buyingPrice": 430,
+    "quantity": 43,
+    "thresholdValue": 12,
+    "expiryDate": "2022-12-11",
+    "availability": "In-stock"
+  },
+  {
+    "id": 2,
+    "name": "Bru",
+    "buyingPrice": 257,
+    "quantity": 22,
+    "thresholdValue": 12,
+    "expiryDate": "2022-12-21",
+    "availability": "Out of stock"
+  },
+  {
+    "id": 3,
+    "name": "Red Bull",
+    "buyingPrice": 405,
+    "quantity": 36,
+    "thresholdValue": 9,
+    "expiryDate": "2022-12-05",
+    "availability": "Low stock"
+  },
+  {
+    "id": 4,
+    "name": "Bourn Vita",
+    "buyingPrice": 502,
+    "quantity": 14,
+    "thresholdValue": 6,
+    "expiryDate": "2022-12-08",
+    "availability": "Low stock"
+  },
+  {
+    "id": 5,
+    "name": "Horlicks",
+    "buyingPrice": 530,
+    "quantity": 5,
+    "thresholdValue": 5,
+    "expiryDate": "2023-01-09",
+    "availability": "In-stock"
+  },
+  {
+    "id": 6,
+    "name": "Harpic",
+    "buyingPrice": 605,
+    "quantity": 10,
+    "thresholdValue": 5,
+    "expiryDate": "2023-01-09",
+    "availability": "In-stock"
+  },
+  {
+    "id": 7,
+    "name": "Ariel",
+    "buyingPrice": 408,
+    "quantity": 23,
+    "thresholdValue": 7,
+    "expiryDate": "2023-12-15",
+    "availability": "Out of stock"
+  }
+]
