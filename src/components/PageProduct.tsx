@@ -1,55 +1,120 @@
-import {useParams} from "react-router-dom";
-import {Button} from "@/components/ui/button.tsx";
-import {Pen} from "lucide-react";
-import {useEffect, useState} from "react";
+import { useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button.tsx";
+import { Pen } from "lucide-react";
+import { useEffect, useState } from "react";
 import ComponentProduct from "@/components/ComponentProduct.tsx";
-import axios from "axios";
-import type {Order, Product, Supplier, User} from "@/lib/constants.ts";
+import type {
+	Order,
+	ProductWithUser,
+	Supplier,
+	UserWithRole,
+} from "@/lib/constants.ts";
 import AddDialogWindow from "@/components/AddDialogWindow.tsx";
+import { supabase } from "@/supabase.ts";
 
 function PageProduct() {
 	const params = useParams();
-	const [user, setUser] = useState<User | undefined>()
-	const [product, setProduct] = useState<Product | undefined>()
+
+	const [user, setUser] = useState<UserWithRole | undefined>();
+	const [product, setProduct] = useState<ProductWithUser | undefined>();
 	const [order, setOrder] = useState<Order | undefined>();
 	const [supplier, setSupplier] = useState<Supplier | undefined>();
+
 	useEffect(() => {
-		async function getItem(){
-			switch (params.entity){
-				case "users":{
-					const data = await axios.get(`https://d05b239fd7c26df7.mokky.dev/${params.entity}/${params.id}`);
-					setUser(data.data);
-					break;
+		async function getItem() {
+			if (!params.entity || !params.id) return;
+
+			const id = Number(params.id);
+
+			if (params.entity === "users") {
+				const { data, error } = await supabase
+					.from("users")
+					.select("*, role:roles(*)")
+					.eq("id", id)
+					.single();
+
+				if (error) {
+					console.error("Ошибка загрузки пользователя:", error);
+					return;
 				}
-				case "inventory":{
-					const data = await axios.get(`https://d05b239fd7c26df7.mokky.dev/${params.entity}/${params.id}?_relations=users,types`);
-					setProduct(data.data);
-					break;
+
+				setUser(data);
+			}
+
+			if (params.entity === "inventory") {
+				const { data, error } = await supabase
+					.from("inventory")
+					.select("*, user:users(*), type:types(*)")
+					.eq("id", id)
+					.single();
+
+				if (error) {
+					console.error("Ошибка загрузки оборудования:", error);
+					return;
 				}
-				case "orders":{
-					const data = await axios.get(`https://d05b239fd7c26df7.mokky.dev/${params.entity}/${params.id}`);
-					setOrder(data.data);
-					break;
+
+				setProduct(data);
+			}
+
+			if (params.entity === "orders") {
+				const { data, error } = await supabase
+					.from("orders")
+					.select("*")
+					.eq("id", id)
+					.single();
+
+				if (error) {
+					console.error("Ошибка загрузки заказа:", error);
+					return;
 				}
-				case "suppliers":{
-					const data = await axios.get(`https://d05b239fd7c26df7.mokky.dev/${params.entity}/${params.id}`);
-					setSupplier(data.data);
-					break;
+
+				setOrder(data);
+			}
+
+			if (params.entity === "suppliers") {
+				const { data, error } = await supabase
+					.from("suppliers")
+					.select("*")
+					.eq("id", id)
+					.single();
+
+				if (error) {
+					console.error("Ошибка загрузки поставщика:", error);
+					return;
 				}
+
+				setSupplier(data);
 			}
 		}
-		getItem();
-	},[])
-	return(
-		<div className='flex flex-col w-full h-full rounded-lg bg-white px-6 py-5'>
+
+		void getItem();
+	}, [params.entity, params.id]);
+	console.log(supplier, user, product, order);
+	return (
+		<div className="flex flex-col w-full h-full rounded-lg bg-white px-6 py-5">
 			<div className="flex flex-row items-center justify-between">
-				<h1 className="font-medium text-lg">{user?.fullName || product?.name || order?.supplier || supplier?.contactPerson}</h1>
+				<h1 className="font-medium text-lg">
+					{user?.fullName ||
+						product?.name ||
+						order?.supplier ||
+						supplier?.contactPerson}
+				</h1>
+
 				<div className="flex flex-row gap-2">
-					<AddDialogWindow title={product ? 'Редактировать оборудование' : order ? 'Редактировать заказ' : supplier ? 'Редактировать поставщика' : 'Редактировать пользователя'}
-									 user={user}
-									 product={product}
-									 order={order}
-									 supplier={supplier}
+					<AddDialogWindow
+						title={
+							product
+								? "Редактировать оборудование"
+								: order
+									? "Редактировать заказ"
+									: supplier
+										? "Редактировать поставщика"
+										: "Редактировать пользователя"
+						}
+						user={user}
+						product={product}
+						order={order}
+						supplier={supplier}
 					>
 						<Button
 							type="button"
@@ -57,19 +122,30 @@ function PageProduct() {
 							size="default"
 							className="bg-blue-500 text-white cursor-pointer text-sm"
 						>
-							<Pen className={'w-4 h-4'}/>
+							<Pen className="w-4 h-4" />
 							Изменить
 						</Button>
 					</AddDialogWindow>
-					<Button type="button" variant="ghost" size="default" className="cursor-pointer border px-5">
+
+					<Button
+						type="button"
+						variant="ghost"
+						size="default"
+						className="cursor-pointer border px-5"
+					>
 						Download
 					</Button>
 				</div>
 			</div>
-			<ComponentProduct user={user} product={product} order={order} supplier={supplier} />
+
+			<ComponentProduct
+				user={user}
+				product={product}
+				order={order}
+				supplier={supplier}
+			/>
 		</div>
-
-
-	)
+	);
 }
+
 export default PageProduct;

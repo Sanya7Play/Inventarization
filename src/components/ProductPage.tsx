@@ -5,7 +5,6 @@ interface ProductProps{
 	product?: ProductWithUser;
 }
 function ProductPage({product}: ProductProps) {
-	console.log(product);
 	return (
 		<div className='flex flex-col w-full cursor-pointer px-10 py-6'>
 			<div className='flex flex-row justify-between'>

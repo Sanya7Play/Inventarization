@@ -45,6 +45,8 @@ function AddDialogWindow({
 		fetchData,
 	} = useAuth();
 
+	const [open, setOpen] = useState(false);
+
 	const [formProduct, setFormProduct] = useState<ProductWithUser | undefined>(product);
 	const [formSupplier, setFormSupplier] = useState<Supplier | undefined>(supplier);
 	const [formOrder, setFormOrder] = useState<Order | undefined>(order);
@@ -64,8 +66,8 @@ function AddDialogWindow({
 					expiryDate: formProduct.expiryDate,
 					status: formProduct.status,
 					img: formProduct.img,
-					userId: formProduct.user?.id ?? null,
-					typeId: formProduct.type?.id ?? null,
+					userId: formProduct.user?.id ?? formProduct.userId ?? null,
+					typeId: formProduct.type?.id ?? formProduct.typeId ?? null,
 				};
 
 				const { error } = product
@@ -126,7 +128,7 @@ function AddDialogWindow({
 					email: formUser.email,
 					phone: formUser.phone,
 					status: formUser.status,
-					roleId: formUser.role?.id ?? null,
+					roleId: formUser.role?.id ?? formUser.roleId ?? null,
 				};
 
 				const { error } = user
@@ -145,7 +147,9 @@ function AddDialogWindow({
 					description: formRoles.description,
 				};
 
-				const { error } = formRoles.id
+				const isEdit = title === "Редактировать роль";
+
+				const { error } = isEdit
 					? await supabase.from("roles").update(payload).eq("id", formRoles.id)
 					: await supabase.from("roles").insert(payload);
 
@@ -163,7 +167,11 @@ function AddDialogWindow({
 					description: formTypes.description,
 				};
 
-				const { error } = formTypes.id
+				const isEdit =
+					title === "Редактировать тип" ||
+					title === "Редактировать тип оборудования";
+
+				const { error } = isEdit
 					? await supabase.from("types").update(payload).eq("id", formTypes.id)
 					: await supabase.from("types").insert(payload);
 
@@ -171,58 +179,54 @@ function AddDialogWindow({
 			}
 
 			await fetchData();
+			setOpen(false);
 		} catch (error) {
 			console.error("Ошибка при сохранении:", error);
 		}
 	};
 
 	return (
-		<Dialog>
-			<form>
-				<DialogTrigger asChild>{children}</DialogTrigger>
+		<Dialog open={open} onOpenChange={setOpen}>
+			<DialogTrigger asChild>{children}</DialogTrigger>
 
-				<DialogContent className="sm:max-w-lg">
-					<DialogHeader>
-						<DialogTitle>{title}</DialogTitle>
-						<DialogDescription />
-					</DialogHeader>
+			<DialogContent className="sm:max-w-lg">
+				<DialogHeader>
+					<DialogTitle>{title}</DialogTitle>
+					<DialogDescription />
+				</DialogHeader>
 
-					<DialogComponent
-						title={title}
-						user={user}
-						product={product}
-						order={order}
-						supplier={supplier}
-						setFormProduct={setFormProduct}
-						setFormSupplier={setFormSupplier}
-						setFormOrder={setFormOrder}
-						setFormUser={setFormUser}
-						setFormRoles={setFormRoles}
-						setFormTypes={setFormTypes}
-					/>
+				<DialogComponent
+					title={title}
+					user={user}
+					product={product}
+					order={order}
+					supplier={supplier}
+					setFormProduct={setFormProduct}
+					setFormSupplier={setFormSupplier}
+					setFormOrder={setFormOrder}
+					setFormUser={setFormUser}
+					setFormRoles={setFormRoles}
+					setFormTypes={setFormTypes}
+				/>
 
-					<DialogFooter className="mt-5 sm:mt-6">
-						<DialogClose asChild>
-							<Button variant="outline" className="cursor-pointer border text-sm">
-								Закрыть
-							</Button>
-						</DialogClose>
-
-						<Button
-							onClick={(e) => {
-								e.preventDefault();
-								void saveItem();
-							}}
-							type="submit"
-							variant="outline"
-							size="default"
-							className="bg-blue-500 text-white cursor-pointer text-sm"
-						>
-							{title}
+				<DialogFooter className="mt-5 sm:mt-6">
+					<DialogClose asChild>
+						<Button variant="outline" className="cursor-pointer border text-sm">
+							Закрыть
 						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</form>
+					</DialogClose>
+
+					<Button
+						type="button"
+						onClick={() => void saveItem()}
+						variant="outline"
+						size="default"
+						className="bg-blue-500 text-white cursor-pointer text-sm"
+					>
+						{title}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
 		</Dialog>
 	);
 }

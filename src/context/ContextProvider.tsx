@@ -225,7 +225,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		fullName: string,
 		email: string,
 		password: string,
-		remember = false
 	) => {
 		const { data: authData, error: authError } = await supabase.auth.signUp({
 			email,
@@ -686,7 +685,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const roleColumns = [
 		{ title: "Роль", render: (role: RoleWithUsers) => role.name },
 		{ title: "Описание", render: (role: RoleWithUsers) => role.description },
-		{ title: "Пользователи", render: (role: RoleWithUsers) => role.user?.fullName ?? 0 },
+		{ title: "Пользователи", render: (role: RoleWithUsers) => role.users?.length ?? 0 },
 		{
 			title: "",
 			render: (role: RoleStat) => (
