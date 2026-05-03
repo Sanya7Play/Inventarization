@@ -73,7 +73,7 @@ function AddDialogWindow({
 				const { error } = product
 					? await supabase.from("inventory").update(payload).eq("id", product.id)
 					: await supabase.from("inventory").insert(payload);
-
+				console.log(error);
 				if (error) throw error;
 			}
 
@@ -145,6 +145,7 @@ function AddDialogWindow({
 				const payload = {
 					name: formRoles.name,
 					description: formRoles.description,
+					permissions: formRoles.permissions ?? [],
 				};
 
 				const isEdit = title === "Редактировать роль";

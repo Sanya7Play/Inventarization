@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { useAuth } from "@/context/ContextProvider.tsx";
 import { useNavigate } from "react-router-dom";
-import bcrypt from "bcryptjs";
 function RegistrationForm() {
 	const { register, fetchData } = useAuth();
 	const navigate = useNavigate();
@@ -47,18 +46,18 @@ function RegistrationForm() {
 
 	return (
 		<div className="flex flex-row items-center justify-center w-full h-screen gap-80 bg-white">
-			<div className="flex flex-col items-center gap-20">
+			<div className="flex flex-col items-center gap-1">
 				<div className="flex flex-col items-center">
-					<img src="/vite.svg" alt="LogoSvg" width="150px" height="150px" />
+					<img src="/logo.png" alt="logo.png" width="350px" height="350px" />
 				</div>
 				<div className="flex items-center">
-					<h1 className="text-4xl font-medium text-blue-600">KANBAN</h1>
+					<h1 className="text-4xl font-medium text-blue-950">INVENTA</h1>
 				</div>
 			</div>
 
 			<form onSubmit={registerForm}>
 				<div className="flex flex-col items-center gap-10">
-					<img src="/vite.svg" alt="LogoSvg" width="45px" height="45px" />
+					<img src="/logo.png" alt="logopng" width="85px" height="45px" />
 
 					<div className="flex flex-col gap-5 text-center">
 						<h1 className="text-4xl font-semibold">Создать новый аккаунт</h1>
@@ -120,7 +119,7 @@ function RegistrationForm() {
 								type="submit"
 								variant="outline"
 								disabled={loading}
-								className="w-full justify-center bg-blue-600 text-white h-10 rounded-lg cursor-pointer"
+								className="w-full justify-center bg-blue-950 text-white h-10 rounded-lg cursor-pointer"
 							>
 								{loading ? "Регистрация..." : "Зарегистрироваться"}
 							</Button>
@@ -146,7 +145,7 @@ function RegistrationForm() {
 								type="button"
 								variant="link"
 								size="sm"
-								className="text-xs text-blue-600 cursor-pointer p-0"
+								className="text-xs text-blue-950 cursor-pointer p-0"
 								onClick={() => navigate("/login")}
 							>
 								Войти

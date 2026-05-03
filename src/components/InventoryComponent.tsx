@@ -12,7 +12,6 @@ interface InventoryComponentProps {
 function InventoryComponent({ product, setFormProduct }: InventoryComponentProps) {
 	const { users, types } = useAuth();
 
-	const [id] = useState(product?.id ?? 0);
 	const [name, setName] = useState(product?.name ?? "");
 	const [inventNumber, setInventNumber] = useState(product?.inventNumber ?? "");
 	const [typeId, setTypeId] = useState(product?.typeId ?? product?.type?.id ?? null);
@@ -24,7 +23,7 @@ function InventoryComponent({ product, setFormProduct }: InventoryComponentProps
 
 	useEffect(() => {
 		setFormProduct({
-			id,
+			...(product ? { id: product.id } : {}),
 			name,
 			inventNumber,
 			typeId,
@@ -35,9 +34,9 @@ function InventoryComponent({ product, setFormProduct }: InventoryComponentProps
 			img,
 			user: users.find((u) => u.id === userId) ?? null,
 			type: types.find((t) => t.id === typeId) ?? null,
-		});
+		} as ProductWithUser);
 	}, [
-		id,
+		product,
 		name,
 		inventNumber,
 		typeId,

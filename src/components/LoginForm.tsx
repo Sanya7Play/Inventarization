@@ -41,18 +41,18 @@ function LoginForm() {
 
 	return (
 		<div className="flex flex-row items-center justify-center w-full h-screen gap-80 bg-white">
-			<div className="flex flex-col items-center gap-20">
+			<div className="flex flex-col items-center gap-1">
 				<div className="flex flex-col items-center">
-					<img src="/vite.svg" alt="LogoSvg" width="150px" height="150px" />
+					<img src="/logo.png" alt="logo.png" width="350px" height="350px" />
 				</div>
 				<div className="flex items-center">
-					<h1 className="text-4xl font-medium text-blue-600">KANBAN</h1>
+					<h1 className="text-4xl font-medium text-blue-950">INVENTA</h1>
 				</div>
 			</div>
 
 			<form onSubmit={handleSubmit}>
 				<div className="flex flex-col items-center gap-10">
-					<img src="/vite.svg" alt="LogoSvg" width="45px" height="45px" />
+					<img src="/logo.png" alt="logo.png" width="175px" height="85px" />
 
 					<div className="flex flex-col gap-5 text-center">
 						<h1 className="text-4xl font-semibold">Вход в аккаунт</h1>
@@ -106,7 +106,7 @@ function LoginForm() {
 								type="button"
 								variant="link"
 								size="sm"
-								className="text-xs text-blue-600 cursor-pointer p-0"
+								className="text-xs text-blue-950 cursor-pointer p-0"
 							>
 								Забыли пароль?
 							</Button>
@@ -121,7 +121,7 @@ function LoginForm() {
 								type="submit"
 								variant="outline"
 								disabled={loading}
-								className="w-full justify-center bg-blue-600 text-white h-10 rounded-lg cursor-pointer"
+								className="w-full justify-center bg-blue-950 text-white h-10 rounded-lg cursor-pointer"
 							>
 								{loading ? "Вход..." : "Вход"}
 							</Button>
@@ -147,7 +147,7 @@ function LoginForm() {
 								type="button"
 								variant="link"
 								size="sm"
-								className="text-xs text-blue-600 cursor-pointer p-0"
+								className="text-xs text-blue-950 cursor-pointer p-0"
 								onClick={() => navigate("/register")}
 							>
 								Зарегистрироваться

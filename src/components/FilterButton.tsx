@@ -3,77 +3,132 @@ import {
 	PopoverContent,
 	PopoverHeader,
 	PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import React from "react";
-import {filterLinks} from "@/lib/constants.ts";
-import {useAuth} from "@/context/ContextProvider.tsx";
+import { useAuth } from "@/context/ContextProvider.tsx";
+import {links} from "@/lib/constants.ts";
+
 interface IFilterButtonProps {
 	title: string;
-	children?: React.ReactNode
+	children?: React.ReactNode;
 }
-function FilterButton({children, title}: IFilterButtonProps) {
-	const { setInventorySort, setSuppliersSort, setOrdersSort } = useAuth();
+
+function FilterButton({ children, title }: IFilterButtonProps) {
+	const {
+		setInventorySort,
+		setSuppliersSort,
+		setOrdersSort,
+		setUsersSort,
+		setRolesSort,
+	} = useAuth();
+
 	const filterFunction = (link: string) => {
-		if (title === 'Список оборудования') {
+		if (title === "Список оборудования") {
 			switch (link) {
-				case 'по имени':
-					setInventorySort('name');
+				case "по имени":
+					setInventorySort("name");
 					break;
-				case 'по типу':
-					setInventorySort('type');
+				case "по типу":
+					setInventorySort("typeName");
 					break;
-				case 'по пользователю':
-					setInventorySort('user_id');
+				case "по пользователю":
+					setInventorySort("userName");
 					break;
 				default:
-					setInventorySort('id');
+					setInventorySort("id");
 					break;
 			}
-		} else if (title === 'Поставщики оборудования') {
+		}
+
+		if (title === "Поставщики оборудования") {
 			switch (link) {
-				case 'по имени':
-					setSuppliersSort('companyName');
+				case "по имени":
+					setSuppliersSort("companyName");
 					break;
-				case 'по типу':
-					setSuppliersSort('contractType');
+				case "по типу":
+					setSuppliersSort("contractType");
 					break;
-				case 'по пользователю':
-					setSuppliersSort('contactPerson');
+				case "по пользователю":
+					setSuppliersSort("contactPerson");
 					break;
 				default:
-					setSuppliersSort('id');
+					setSuppliersSort("id");
 					break;
 			}
-		} else if (title === 'Оборудование') {
+		}
+
+		if (title === "Оборудование") {
 			switch (link) {
-				case 'по имени':
-					setOrdersSort('purchaseNumber');
+				case "по имени":
+					setOrdersSort("purchaseNumber");
 					break;
-				case 'по типу':
-					setOrdersSort('status');
+				case "по типу":
+					setOrdersSort("status");
 					break;
-				case 'по пользователю':
-					setOrdersSort('supplier');
+				case "по пользователю":
+					setOrdersSort("supplier");
 					break;
 				default:
-					setOrdersSort('id');
+					setOrdersSort("id");
+					break;
+			}
+		}
+
+		if (title === "Пользователи") {
+			switch (link) {
+				case "по имени":
+					setUsersSort("fullName");
+					break;
+				case "по типу":
+					setUsersSort("status");
+					break;
+				default:
+					setUsersSort("id");
+					break;
+			}
+		}
+
+		if (title === "Роли и права") {
+			switch (link) {
+				case "по имени":
+					setRolesSort("name");
+					break;
+				default:
+					setRolesSort("id");
+					break;
+			}
+		}
+		if (title === "Пользователи системы") {
+			switch (link) {
+				case "по имени":
+					setInventorySort("name");
+					break;
+				case "по типу":
+					setInventorySort("typeName");
+					break;
+				case "по пользователю":
+					setInventorySort("userName");
+					break;
+				default:
+					setInventorySort("id");
 					break;
 			}
 		}
 	};
+
+
+
 	return (
 		<Popover>
-			<PopoverTrigger asChild>
-				{children}
-			</PopoverTrigger>
-			<PopoverContent className='w-50'>
-				<PopoverHeader>
-				</PopoverHeader>
-				<div className='flex flex-col justify-center m-2'>
-					{filterLinks.map((link, i) => (
+			<PopoverTrigger asChild>{children}</PopoverTrigger>
+
+			<PopoverContent className="w-50">
+				<PopoverHeader />
+				<div className="flex flex-col justify-center m-2">
+					{links.map((link) => (
 						<div
-							key={i}
-							className='pb-2 text-sm font-medium cursor-pointer hover:text-blue-600'
+							key={link}
+							className="pb-2 text-sm font-medium cursor-pointer hover:text-blue-600"
 							onClick={() => filterFunction(link)}
 						>
 							{link}
@@ -82,6 +137,7 @@ function FilterButton({children, title}: IFilterButtonProps) {
 				</div>
 			</PopoverContent>
 		</Popover>
-	)
+	);
 }
+
 export default FilterButton;

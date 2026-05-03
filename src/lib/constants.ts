@@ -8,11 +8,12 @@ import {
 	Settings, ShoppingBag,
 	User, UserKey,
 } from "lucide-react";
-
+export const links = ["по возрастанию", "по имени", "по типу", "по пользователю"];
 export interface RoleStat {
 	id: number;
 	name: string;
 	description: string | null;
+	permissions: string[];
 }
 
 export interface User {
@@ -33,7 +34,7 @@ export type TypeInventory = {
 
 export interface RoleWithUsers extends RoleStat {
 	users?: User[];
-	user?: User; // оставь пока, чтобы старый UI не падал
+	user?: User;
 }
 
 export interface UserWithRole extends User {

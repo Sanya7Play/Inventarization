@@ -7,9 +7,9 @@ function Menu() {
 	return (
 		<div className="flex flex-col w-[320px] bg-white rounded-r-2xl px-5 py-10 min-h-screen">
 			<Link to="/" className="px-10" onClick={() => setActiveTab(0)}>
-				<div className="flex items-center gap-3">
-					<img src="/vite.svg" alt="LogoSvg" width="40" height="40" />
-					<h1 className="text-lg text-blue-700 font-semibold">KANBAN</h1>
+				<div className="flex items-center gap-1">
+					<img src="/logo.png" alt="logopng" width="80" height="40" />
+					<h1 className="text-lg text-blue-950 font-semibold">KANBAN</h1>
 				</div>
 			</Link>
 

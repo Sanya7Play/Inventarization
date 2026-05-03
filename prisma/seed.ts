@@ -92,6 +92,56 @@ async function main() {
 		skipDuplicates: true,
 	});
 
+	await prisma.role.createMany({
+		data: [
+			{
+				id: 1,
+				name: "Администратор",
+				description: "Полный доступ",
+				permissions: [
+					"users.read",
+					"users.create",
+					"users.update",
+					"users.delete",
+					"inventory.read",
+					"inventory.create",
+					"inventory.update",
+					"inventory.delete",
+					"orders.read",
+					"orders.create",
+					"orders.update",
+					"orders.delete",
+					"suppliers.read",
+					"suppliers.create",
+					"suppliers.update",
+					"suppliers.delete",
+				],
+			},
+			{
+				id: 2,
+				name: "Техник",
+				description: "Работа с оборудованием",
+				permissions: [
+					"inventory.read",
+					"inventory.create",
+					"inventory.update",
+					"orders.read",
+				],
+			},
+			{
+				id: 3,
+				name: "Менеджер",
+				description: "Работа с заказами",
+				permissions: [
+					"orders.read",
+					"orders.create",
+					"orders.update",
+					"suppliers.read",
+				],
+			},
+		],
+		skipDuplicates: true,
+	});
 	console.log("Seed completed 🚀");
 }
 

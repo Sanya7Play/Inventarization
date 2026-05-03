@@ -38,6 +38,7 @@ type GlobalSearchItem = {
 };
 
 type AuthContextType = {
+	can: (permission: string) => boolean;
 	isAuth: boolean;
 	login: (email: string, password: string, remember?: boolean) => Promise<void>;
 	logout: () => Promise<void>;
@@ -111,6 +112,8 @@ type AuthContextType = {
 	restoreBackupById: (id: number) => Promise<void>;
 	deleteBackup: (id: number) => Promise<void>;
 	downloadBackupById: (id: number) => Promise<void>;
+	loading: boolean;
+	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 
 };
 
@@ -143,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [formRoles, setFormRoles] = useState<RoleWithUsers | undefined>();
 	const [formTypes, setFormTypes] = useState<TypeInventory | undefined>();
+	const [loading, setLoading] = useState(true);
 
 
 	useEffect(() => {
@@ -151,7 +155,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 			const session = data.session;
 
-			if (!session?.user) return;
+			if (!session?.user) {
+				setLoading(false);
+				return;
+			}
 
 			const email = session.user.email;
 
@@ -168,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 			setAuthUser(user);
 			setIsAuth(true);
+			setLoading(false);
 		};
 
 		initAuth();
@@ -198,6 +206,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		};
 	}, []);
 
+	const can = useCallback(
+		(permission: string) => {
+			return authUser?.role?.permissions?.includes(permission) ?? false;
+		},
+		[authUser]
+
+	);
 	const login = async (email: string, password: string) => {
 		const { data, error } = await supabase.auth.signInWithPassword({
 			email,
@@ -245,7 +260,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				fullName,
 				email,
 				status: "Активен",
-				roleId: 2,
+				roleId: 4,
 			})
 			.select("*, role:roles(*)")
 			.single();
@@ -258,11 +273,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		setAuthUser(userProfile);
 	};
 
-	const logout = async () => {
-		await supabase.auth.signOut();
 
+	const logout = async () => {
 		setIsAuth(false);
 		setAuthUser(null);
+		await supabase.auth.signOut();
 	};
 
 	const applyBackupDataToState = useCallback((backupData: Partial<BackupRecord["data"]>) => {
@@ -513,6 +528,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 	const fetchData = useCallback(async (): Promise<void> => {
 		try {
+			const inventoryOrder = inventorySort === "typeName" || inventorySort === "userName" ? "id" : inventorySort;
 			const [
 				productsRes,
 				ordersRes,
@@ -524,7 +540,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				supabase
 					.from("inventory")
 					.select("*, user:users(*), type:types(*)")
-					.order(inventorySort, { ascending: true }),
+					.order(inventoryOrder, { ascending: true }),
 
 				supabase
 					.from("orders")
@@ -559,7 +575,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			if (rolesRes.error) throw rolesRes.error;
 			if (typeRes.error) throw typeRes.error;
 
-			const productsData = productsRes.data ?? [];
+			let productsData = productsRes.data ?? [];
+
+			if (inventorySort === "typeName") {
+				productsData = [...productsData].sort((a, b) =>
+					(a.type?.typeName ?? "").localeCompare(b.type?.typeName ?? "")
+				);
+			}
+
+			if (inventorySort === "userName") {
+				productsData = [...productsData].sort((a, b) =>
+					(a.user?.fullName ?? "").localeCompare(b.user?.fullName ?? "")
+				);
+			}
 			const ordersData = ordersRes.data ?? [];
 			const usersData = usersRes.data ?? [];
 			const suppliersData = suppliersRes.data ?? [];
@@ -581,7 +609,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			console.error("Ошибка при загрузке данных:", e);
 		}
 	}, [inventorySort, suppliersSort, ordersSort, usersSort, rolesSort]);
-	console.log(users, products);
 	useEffect(() => {
 		fetchData();
 		fetchBackups();
@@ -614,19 +641,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			title: "",
 			render: (product) => (
 				<div className="flex gap-5" onClick={(e) => e.stopPropagation()}>
-					<DeleteDialogWindow product={product}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={(e) => {
-								e.stopPropagation();
-								console.log("delete product", product);
-							}}
-						>
-							<X className="w-4 h-4" />
-						</Button>
-					</DeleteDialogWindow>
+					{can("inventory.delete") && (
+						<DeleteDialogWindow product={product}>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
+								onClick={(e) => {
+									e.stopPropagation();
+									console.log("delete product", product);
+								}}
+							>
+								<X className="w-4 h-4" />
+							</Button>
+						</DeleteDialogWindow>
+					)}
 				</div>
 			),
 		},
@@ -650,33 +679,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			title: "",
 			render: (user) => (
 				<div className="flex gap-5" onClick={(e) => e.stopPropagation()}>
-					<AddDialogWindow title="Редактировать пользователя" user={user}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={(e) => {
-								e.stopPropagation();
-								console.log("add user", user);
-							}}
-						>
-							<Edit className="w-4 h-4" />
-						</Button>
-					</AddDialogWindow>
+					{can("users.update") && (
+						<AddDialogWindow title="Редактировать пользователя" user={user}>
+							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
+								<Edit className="w-4 h-4" />
+							</Button>
+						</AddDialogWindow>
+					)}
 
-					<DeleteDialogWindow user={user}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={(e) => {
-								e.stopPropagation();
-								console.log("delete user", user);
-							}}
-						>
-							<X className="w-4 h-4" />
-						</Button>
-					</DeleteDialogWindow>
+					{can("users.delete") && (
+						<DeleteDialogWindow user={user}>
+							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
+								<X className="w-4 h-4" />
+							</Button>
+						</DeleteDialogWindow>
+					)}
 				</div>
 			),
 		},
@@ -690,31 +707,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			title: "",
 			render: (role: RoleStat) => (
 				<div className="flex gap-5">
-					<EditDialogWindow role={role} setFormRoles={setFormRoles} formRoles={formRoles}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={() => {
-								console.log("edit role", role);
-							}}
-						>
-							<Edit className="w-4 h-4" />
-						</Button>
-					</EditDialogWindow>
-					<DeleteDialogWindow role={role}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={(e) => {
-								e.stopPropagation();
-								console.log("delete role", role);
-							}}
-						>
-							<X className="w-4 h-4" />
-						</Button>
-					</DeleteDialogWindow>
+					{can("roles.update") && (
+						<EditDialogWindow role={role} setFormRoles={setFormRoles} formRoles={formRoles}>
+							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
+								<Edit className="w-4 h-4" />
+							</Button>
+						</EditDialogWindow>
+					)}
+
+					{can("roles.delete") && (
+						<DeleteDialogWindow role={role}>
+							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
+								<X className="w-4 h-4" />
+							</Button>
+						</DeleteDialogWindow>
+					)}
 				</div>
 			),
 		},
@@ -728,31 +735,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			title: "Действия",
 			render: (type: TypeInventory) => (
 				<div className="flex gap-5">
-					<EditDialogWindow type={type} setFormTypes={setFormTypes} formTypes={formTypes}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={() => {
-								console.log("edit type", type);
-							}}
-						>
-							<Edit className="w-4 h-4" />
-						</Button>
-					</EditDialogWindow>
-					<DeleteDialogWindow type={type}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={(e) => {
-								e.stopPropagation();
-								console.log("delete type", type);
-							}}
-						>
-							<X className="w-4 h-4" />
-						</Button>
-					</DeleteDialogWindow>
+					{can("types.update") && (
+						<EditDialogWindow type={type} setFormTypes={setFormTypes} formTypes={formTypes}>
+							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
+								<Edit className="w-4 h-4" />
+							</Button>
+						</EditDialogWindow>
+					)}
+
+					{can("types.delete") && (
+						<DeleteDialogWindow type={type}>
+							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
+								<X className="w-4 h-4" />
+							</Button>
+						</DeleteDialogWindow>
+					)}
 				</div>
 			),
 		},
@@ -786,19 +783,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			title: "",
 			render: (order) => (
 				<div className="flex gap-5" onClick={(e) => e.stopPropagation()}>
-					<DeleteDialogWindow order={order}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={(e) => {
-								e.stopPropagation();
-								console.log("delete order", order);
-							}}
-						>
-							<X className="w-4 h-4" />
-						</Button>
-					</DeleteDialogWindow>
+					{can("orders.delete") && (
+						<DeleteDialogWindow order={order}>
+							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
+								<X className="w-4 h-4" />
+							</Button>
+						</DeleteDialogWindow>
+					)}
 				</div>
 			),
 		},
@@ -830,19 +821,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			title: "",
 			render: (supplier) => (
 				<div className="flex gap-5" onClick={(e) => e.stopPropagation()}>
-					<DeleteDialogWindow supplier={supplier}>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="flex justify-center px-2 py-1 cursor-pointer hover:text-black"
-							onClick={(e) => {
-								e.stopPropagation();
-								console.log("delete supplier", supplier);
-							}}
-						>
-							<X className="w-4 h-4" />
-						</Button>
-					</DeleteDialogWindow>
+					{can("suppliers.delete") && (
+						<DeleteDialogWindow supplier={supplier}>
+							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
+								<X className="w-4 h-4" />
+							</Button>
+						</DeleteDialogWindow>
+					)}
 				</div>
 			),
 		},
@@ -851,11 +836,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	return (
 		<AuthContext.Provider
 			value={{
+				can,
 				isAuth,
 				login,
 				register,
 				logout,
 				authUser,
+				loading,
+				setLoading,
 
 				products,
 				suppliers,

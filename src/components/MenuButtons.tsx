@@ -13,13 +13,16 @@ function MenuButtons({activeTab, setActiveTab}: MenuButtons) {
 	const navigate = useNavigate();
 
 	const topButtons = buttonsMenu.slice(0, 8);
-
+	const handleLogout = async () => {
+		await logout();
+		navigate("/login", { replace: true });
+	};
 	const renderButton = (button: any, index: number) => {
 		const Icon = button.icon;
 		const isActive = activeTab === index;
 
 		const commonBtnClass = `flex flex-row items-center gap-3 cursor-pointer w-full ${
-			isActive ? "bg-gray-200 text-blue-700" : ""
+			isActive ? "bg-gray-200 text-blue-950" : ""
 		}`;
 
 		// ✅ logout без Link
@@ -32,8 +35,7 @@ function MenuButtons({activeTab, setActiveTab}: MenuButtons) {
 					className={commonBtnClass}
 					onClick={() => {
 						setActiveTab(index);
-						logout();
-						navigate("/login", { replace: true });
+						handleLogout();
 					}}
 				>
 					<Icon className="w-40 h-40" />

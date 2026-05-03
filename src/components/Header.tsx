@@ -7,10 +7,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Header() {
-	const { searchQuery, setSearchQuery, globalSearchResults } = useAuth();
+	const { searchQuery, setSearchQuery, globalSearchResults, authUser} = useAuth();
 	const navigate = useNavigate();
 	const [open, setOpen] = useState<boolean>(false);
-	console.log(globalSearchResults);
 	const handleClear = () => {
 		setSearchQuery("");
 		setOpen(false);
@@ -90,9 +89,11 @@ function Header() {
 					</Button>
 				</div>
 
+
 				<Avatar
 					size="lg"
 					className="cursor-pointer bg-neutral-200"
+					onClick={() => navigate(`/users/${authUser?.id}`)}
 				>
 					<AvatarImage
 						src="/vite.svg"

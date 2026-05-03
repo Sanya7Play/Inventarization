@@ -3,8 +3,10 @@ import {NavLink, Outlet} from "react-router-dom";
 import {menuButtons} from "@/lib/constants.ts";
 import {useState} from "react";
 
+
 function Settings() {
 	const [active, setActive] = useState(0);
+
 	return (
 		<div className="grid grid-cols-1 gap-8">
 			<div className="rounded-lg bg-white px-6 py-5 h-auto">
