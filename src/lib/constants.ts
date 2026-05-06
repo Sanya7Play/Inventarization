@@ -77,7 +77,11 @@ export type Order = {
 	sum: number | null;
 	status: string;
 };
-
+export type Equipment = {
+	id: number;
+	name: string;
+	status: string;
+}
 export type BackupRecord = {
 	id: number;
 	name: string;
@@ -128,7 +132,46 @@ export const buttonsMenu = [
 		icon: LogOutIcon,
 		action: "logout",
 	}
-]
+];
+
+export const permissionGroups = [
+	{
+		title: "Пользователи",
+		items: [
+			{ label: "Просмотр", key: "users.read" },
+			{ label: "Создание", key: "users.create" },
+			{ label: "Редактирование", key: "users.update" },
+			{ label: "Удаление", key: "users.delete" },
+		],
+	},
+	{
+		title: "Оборудование",
+		items: [
+			{ label: "Просмотр", key: "inventory.read" },
+			{ label: "Создание", key: "inventory.create" },
+			{ label: "Редактирование", key: "inventory.update" },
+			{ label: "Удаление", key: "inventory.delete" },
+		],
+	},
+	{
+		title: "Заказы",
+		items: [
+			{ label: "Просмотр", key: "orders.read" },
+			{ label: "Создание", key: "orders.create" },
+			{ label: "Редактирование", key: "orders.update" },
+			{ label: "Удаление", key: "orders.delete" },
+		],
+	},
+	{
+		title: "Поставщики",
+		items: [
+			{ label: "Просмотр", key: "suppliers.read" },
+			{ label: "Создание", key: "suppliers.create" },
+			{ label: "Редактирование", key: "suppliers.update" },
+			{ label: "Удаление", key: "suppliers.delete" },
+		],
+	},
+];
 export const menuButtons = [
 	{ name: "Пользователи", icon: User, link: "/settings/users" },
 	{ name: "Роли и права", icon: UserKey, link: "/settings/role" },

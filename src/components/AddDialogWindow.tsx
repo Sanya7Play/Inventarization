@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button.tsx";
 import DialogComponent from "@/components/DialogComponents.tsx";
 import type {
 	Order,
-	ProductWithUser,
+	ProductWithUser, RoleWithUsers,
 	Supplier,
 	UserWithRole,
 } from "@/lib/constants.ts";
@@ -27,6 +27,7 @@ interface ProductDialogProps {
 	product?: ProductWithUser;
 	supplier?: Supplier;
 	order?: Order;
+	role?: RoleWithUsers;
 }
 
 function AddDialogWindow({
@@ -36,13 +37,14 @@ function AddDialogWindow({
 							 product,
 							 order,
 							 supplier,
+							 role,
 						 }: ProductDialogProps) {
 	const {
-		formRoles,
-		setFormRoles,
 		formTypes,
 		setFormTypes,
 		fetchData,
+		setEquipment,
+		setDot,
 	} = useAuth();
 
 	const [open, setOpen] = useState(false);
@@ -51,14 +53,26 @@ function AddDialogWindow({
 	const [formSupplier, setFormSupplier] = useState<Supplier | undefined>(supplier);
 	const [formOrder, setFormOrder] = useState<Order | undefined>(order);
 	const [formUser, setFormUser] = useState<UserWithRole | undefined>(user);
+	const [formRole, setFormRole] = useState<RoleWithUsers>({
+		id: role?.id ?? 0,
+		name: role?.name ?? "",
+		description: role?.description ?? "",
+		permissions: Array.isArray(role?.permissions) ? role.permissions : [],
+	} as RoleWithUsers);
 
 	const saveItem = async () => {
 		try {
 			if (
-				(title === "Редактировать оборудование" ||
-					title === "Добавить оборудование") &&
-				formProduct
-			) {
+				(title === "Редактировать оборудование" || title === "Добавить оборудование") && formProduct) {
+				if (title === "Редактировать оборудование"){
+					const equipment = {
+						id: formProduct.id,
+						name: formProduct?.name,
+						status: formProduct?.status,
+					}
+					setEquipment(prev => [...prev, equipment]);
+					setDot(true);
+				}
 				const payload = {
 					name: formProduct.name,
 					inventNumber: formProduct.inventNumber,
@@ -73,7 +87,6 @@ function AddDialogWindow({
 				const { error } = product
 					? await supabase.from("inventory").update(payload).eq("id", product.id)
 					: await supabase.from("inventory").insert(payload);
-				console.log(error);
 				if (error) throw error;
 			}
 
@@ -138,20 +151,17 @@ function AddDialogWindow({
 				if (error) throw error;
 			}
 
-			if (
-				(title === "Редактировать роль" || title === "Добавить роль") &&
-				formRoles
-			) {
+			if ((title === "Редактировать роль" || title === "Добавить роль") && formRole) {
 				const payload = {
-					name: formRoles.name,
-					description: formRoles.description,
-					permissions: formRoles.permissions ?? [],
+					name: formRole.name,
+					description: formRole.description,
+					permissions: formRole.permissions ?? [],
 				};
 
 				const isEdit = title === "Редактировать роль";
 
 				const { error } = isEdit
-					? await supabase.from("roles").update(payload).eq("id", formRoles.id)
+					? await supabase.from("roles").update(payload).eq("id", formRole.id)
 					: await supabase.from("roles").insert(payload);
 
 				if (error) throw error;
@@ -202,11 +212,12 @@ function AddDialogWindow({
 					product={product}
 					order={order}
 					supplier={supplier}
+					formRole={formRole}
 					setFormProduct={setFormProduct}
 					setFormSupplier={setFormSupplier}
 					setFormOrder={setFormOrder}
 					setFormUser={setFormUser}
-					setFormRoles={setFormRoles}
+					setFormRole={setFormRole}
 					setFormTypes={setFormTypes}
 				/>
 

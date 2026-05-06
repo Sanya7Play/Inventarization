@@ -1,7 +1,7 @@
 import { buttonsMenu } from "@/lib/constants.ts";
-import { Link, useNavigate } from "react-router-dom";
+import { Link} from "react-router-dom";
 import { Button } from "@/components/ui/button.tsx";
-import { useAuth } from "@/context/ContextProvider.tsx";
+import LogoutWindow from "@/components/ui/LogoutWindow.tsx";
 
 interface MenuButtons {
 	activeTab: number;
@@ -9,14 +9,8 @@ interface MenuButtons {
 }
 function MenuButtons({activeTab, setActiveTab}: MenuButtons) {
 
-	const { logout } = useAuth();
-	const navigate = useNavigate();
-
 	const topButtons = buttonsMenu.slice(0, 8);
-	const handleLogout = async () => {
-		await logout();
-		navigate("/login", { replace: true });
-	};
+
 	const renderButton = (button: any, index: number) => {
 		const Icon = button.icon;
 		const isActive = activeTab === index;
@@ -28,25 +22,25 @@ function MenuButtons({activeTab, setActiveTab}: MenuButtons) {
 		// ✅ logout без Link
 		if (button.action === "logout") {
 			return (
-				<Button
-					key={index}
-					variant="outline"
-					size="default"
-					className={commonBtnClass}
-					onClick={() => {
-						setActiveTab(index);
-						handleLogout();
-					}}
-				>
-					<Icon className="w-40 h-40" />
-					<span>{button.name}</span>
-				</Button>
+				<LogoutWindow key={button.name}>
+					<Button
+						variant="outline"
+						size="default"
+						className={commonBtnClass}
+						onClick={() => {
+							setActiveTab(index);
+						}}
+					>
+						<Icon className="w-40 h-40" />
+						<span>{button.name}</span>
+					</Button>
+				</LogoutWindow>
 			);
 		}
 
 		// ✅ обычные пункты через Link
 		return (
-			<Link to={button.link} key={index}>
+			<Link to={button.link} key={button.name}>
 				<Button
 					variant="outline"
 					size="default"

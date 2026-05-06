@@ -1,6 +1,6 @@
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import { Button } from "@/components/ui/button.tsx";
-import { Pen } from "lucide-react";
+import {ArrowLeft, Pen} from "lucide-react";
 import {useCallback, useEffect, useState} from "react";
 import ComponentProduct from "@/components/ComponentProduct.tsx";
 import type {
@@ -15,6 +15,7 @@ import {useAuth} from "@/context/ContextProvider.tsx";
 
 function PageProduct() {
 	const params = useParams();
+	const navigate = useNavigate();
 	const {authUser} = useAuth();
 
 	const [user, setUser] = useState<UserWithRole | undefined>();
@@ -100,16 +101,25 @@ function PageProduct() {
 	const exportToPDF = () => {
 		window.print();
 	};
-
 	return (
 		<div className="flex flex-col w-full h-full rounded-lg bg-white px-6 py-5">
 			<div className="flex flex-row items-center justify-between px-10 pt-6">
+				<Button
+					type="button"
+					variant="ghost"
+					size="default"
+					className="cursor-pointer border px-5"
+					onClick={() => navigate(`/${params.entity}`)}
+				>
+					<ArrowLeft className="w-4 h-4" /> Назад
+				</Button>
 				<h1 className="font-medium text-lg">
 					{user?.fullName ||
 						product?.name ||
 						order?.supplier ||
 						supplier?.contactPerson}
 				</h1>
+
 				{can("users.update") && (
 					<div className="flex flex-row gap-2">
 						<AddDialogWindow

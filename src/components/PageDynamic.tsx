@@ -63,7 +63,7 @@ function PageDynamic<T extends { id: string | number }>({
 					</div>
 
 					<div className="flex flex-col gap-2 border-r-1 px-10">
-						<h1 className="text-violet-600 font-medium">{topSelling}</h1>
+						<h1 className="text-green-500 font-medium">{topSelling}</h1>
 						<div className="flex flex-row justify-between pr-5">
 							<div className="flex flex-col gap-2">
 								<span className="text-base">{topSellingCount}</span>

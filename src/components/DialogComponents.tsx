@@ -20,10 +20,11 @@ interface DialogComponentProps {
 	user?: UserWithRole;
 	order?: Order;
 	supplier?: Supplier;
+	formRole: RoleWithUsers;
 	setFormSupplier: React.Dispatch<React.SetStateAction<Supplier | undefined>>;
 	setFormOrder: React.Dispatch<React.SetStateAction<Order | undefined>>;
-	setFormRoles: React.Dispatch<React.SetStateAction<RoleWithUsers | undefined>>
-	setFormTypes: React.Dispatch<React.SetStateAction<TypeInventory | undefined>>
+	setFormRole: React.Dispatch<React.SetStateAction<RoleWithUsers>>;
+	setFormTypes: React.Dispatch<React.SetStateAction<TypeInventory | undefined>>;
 	setFormProduct: React.Dispatch<React.SetStateAction<ProductWithUser | undefined>>;
 	setFormUser: React.Dispatch<React.SetStateAction<UserWithRole | undefined>>;
 }
@@ -34,11 +35,12 @@ function DialogComponent({
 							 product,
 							 order,
 							 supplier,
+							 formRole,
 							 setFormProduct,
 							 setFormSupplier,
 							 setFormOrder,
 							 setFormUser,
-							 setFormRoles,
+							 setFormRole,
 							 setFormTypes,
 						 }: DialogComponentProps) {
 	return (
@@ -50,8 +52,8 @@ function DialogComponent({
 			) : title === "Редактировать заказ" || title === "Добавить заказ" ? (
 				<OrderComponent order={order} setFormOrder={setFormOrder} />
 			) : title === "Редактировать роль" || title === "Добавить роль" ? (
-				<AddRole setFormRoles={setFormRoles} />
-			) : title === 'Редактировать тип' || title === 'Добавить тип оборудования' ? (
+				<AddRole formRole={formRole} setFormRole={setFormRole} />
+			) : title === "Редактировать тип" || title === "Добавить тип оборудования" ? (
 				<AddType setFormTypes={setFormTypes} />
 			) : (
 				<UserComponent user={user} setFormUser={setFormUser} />

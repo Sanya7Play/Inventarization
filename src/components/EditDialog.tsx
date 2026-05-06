@@ -12,16 +12,14 @@ import { Button } from "@/components/ui/button.tsx";
 import type { RoleStat, RoleWithUsers, TypeInventory } from "@/lib/constants.ts";
 import AddRole from "@/components/AddRole.tsx";
 import React from "react";
-import {useAuth} from "@/context/ContextProvider.tsx";
+import { useAuth } from "@/context/ContextProvider.tsx";
 import AddType from "@/components/AddType.tsx";
-import {supabase} from "@/supabase.ts";
+import { supabase } from "@/supabase.ts";
 
 interface IProps {
 	type?: TypeInventory;
 	role?: RoleStat;
-	formRoles?: RoleWithUsers | undefined;
 	formTypes?: TypeInventory | undefined;
-	setFormRoles?: React.Dispatch<React.SetStateAction<RoleWithUsers | undefined>>;
 	setFormTypes?: React.Dispatch<React.SetStateAction<TypeInventory | undefined>>;
 	children?: React.ReactNode;
 }
@@ -29,16 +27,31 @@ interface IProps {
 function EditDialogWindow({
 							  children,
 							  role,
-							  formRoles,
 							  formTypes,
-							  setFormRoles,
-							  type,
 							  setFormTypes,
+							  type,
 						  }: IProps) {
-	const {fetchData} = useAuth();
+	const { fetchData } = useAuth();
+
+	const [formRole, setFormRole] = React.useState<RoleWithUsers>({
+		id: role?.id ?? 0,
+		name: role?.name ?? "",
+		description: role?.description ?? "",
+		permissions: Array.isArray(role?.permissions) ? role.permissions : [],
+	} as RoleWithUsers);
+	const [open, setOpen] = React.useState(false);
+
+	React.useEffect(() => {
+		setFormRole({
+			id: role?.id ?? 0,
+			name: role?.name ?? "",
+			description: role?.description ?? "",
+			permissions: Array.isArray(role?.permissions) ? role.permissions : [],
+		} as RoleWithUsers);
+	}, [role]);
+
 	const submitButton = async () => {
 		try {
-			// изменить тип
 			if (type && formTypes) {
 				const { error } = await supabase
 					.from("types")
@@ -54,14 +67,11 @@ function EditDialogWindow({
 				return;
 			}
 
-			// создать тип
 			if (!type && formTypes) {
-				const { error } = await supabase
-					.from("types")
-					.insert({
-						typeName: formTypes.typeName,
-						description: formTypes.description,
-					});
+				const { error } = await supabase.from("types").insert({
+					typeName: formTypes.typeName,
+					description: formTypes.description,
+				});
 
 				if (error) throw error;
 
@@ -69,13 +79,13 @@ function EditDialogWindow({
 				return;
 			}
 
-			// изменить роль
-			if (role && formRoles) {
+			if (role) {
 				const { error } = await supabase
 					.from("roles")
 					.update({
-						name: formRoles.name,
-						description: formRoles.description,
+						name: formRole.name,
+						description: formRole.description,
+						permissions: formRole.permissions,
 					})
 					.eq("id", role.id);
 
@@ -85,68 +95,59 @@ function EditDialogWindow({
 				return;
 			}
 
-			// создать роль
-			if (!role && formRoles) {
-				const { error } = await supabase
-					.from("roles")
-					.insert({
-						name: formRoles.name,
-						description: formRoles.description,
-					});
+			const { error } = await supabase.from("roles").insert({
+				name: formRole.name,
+				description: formRole.description,
+				permissions: formRole.permissions,
+			});
 
-				if (error) throw error;
+			if (error) throw error;
 
-				await fetchData();
-			}
+			await fetchData();
 		} catch (error) {
 			console.error("Ошибка при сохранении:", error);
+		}
+		finally {
+			setOpen(false);
 		}
 	};
 
 	return (
-		<Dialog>
-			<form>
-				<DialogTrigger asChild>{children}</DialogTrigger>
-				<DialogContent className="sm:max-w-lg">
-					<DialogHeader>
-						<DialogTitle>{role?.name || type?.typeName || "Редактирование"}</DialogTitle>
-						<DialogDescription />
-					</DialogHeader>
-					{type ? (
-						<AddType
-							type={type}
-							setFormTypes={setFormTypes}
-						/>
-					) : (
-						<AddRole
-							role={role}
-							setFormRoles={setFormRoles}
-						/>
-					)}
+		<Dialog open={open} onOpenChange={setOpen}>
+			<DialogTrigger asChild>{children}</DialogTrigger>
 
+			<DialogContent className="sm:max-w-lg">
+				<DialogHeader>
+					<DialogTitle>
+						{role?.name || type?.typeName || "Редактирование"}
+					</DialogTitle>
+					<DialogDescription />
+				</DialogHeader>
 
-					<DialogFooter className="mt-5 sm:mt-6">
-						<DialogClose asChild>
-							<Button variant="outline" className="cursor-pointer border text-sm">
-								Закрыть
-							</Button>
-						</DialogClose>
+				{type ? (
+					<AddType type={type} setFormTypes={setFormTypes} />
+				) : (
+					<AddRole formRole={formRole} setFormRole={setFormRole} />
+				)}
 
-						<Button
-							onClick={(e) => {
-								e.preventDefault();
-								void submitButton();
-							}}
-							type="submit"
-							variant="outline"
-							size="default"
-							className="bg-blue-500 text-white cursor-pointer text-sm"
-						>
-							{role ? "Изменить роль" : "Изменить тип"}
+				<DialogFooter className="mt-5 sm:mt-6">
+					<DialogClose asChild>
+						<Button variant="outline" className="cursor-pointer border text-sm">
+							Закрыть
 						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</form>
+					</DialogClose>
+
+					<Button
+						type="button"
+						onClick={() => void submitButton()}
+						variant="outline"
+						size="default"
+						className="bg-blue-500 text-white cursor-pointer text-sm"
+					>
+						{role ? "Изменить роль" : type ? "Изменить тип" : "Создать роль"}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
 		</Dialog>
 	);
 }

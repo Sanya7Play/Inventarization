@@ -121,7 +121,6 @@ function FilterButton({ children, title }: IFilterButtonProps) {
 	return (
 		<Popover>
 			<PopoverTrigger asChild>{children}</PopoverTrigger>
-
 			<PopoverContent className="w-50">
 				<PopoverHeader />
 				<div className="flex flex-col justify-center m-2">

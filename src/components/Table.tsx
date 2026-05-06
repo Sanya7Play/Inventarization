@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { Button } from "@/components/ui/button.tsx";
 import {Download, Filter, PlusIcon} from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -32,28 +32,12 @@ function Table<T extends { id: string | number }>({
 												  }: Props<T>) {
 	const { can } = useAuth();
 	const navigate = useNavigate();
+
 	const ITEMS_PER_PAGE = 6;
-	const [activePage, setActivePage] = useState(1);
+	const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+	const loaderRef = useRef<HTMLDivElement | null>(null);
 
-	const itemsCount = items.length;
-	const totalPages = Math.ceil(itemsCount / ITEMS_PER_PAGE);
-
-	const startIndex = (activePage - 1) * ITEMS_PER_PAGE;
-	const endIndex = startIndex + ITEMS_PER_PAGE;
-
-	const paginatedItems = items.slice(startIndex, endIndex);
-
-	const nextPagePagination = () => {
-		if (activePage < totalPages) {
-			setActivePage((prev) => prev + 1);
-		}
-	};
-
-	const prevPagePagination = () => {
-		if (activePage > 1) {
-			setActivePage((prev) => prev - 1);
-		}
-	};
+	const visibleItems = items.slice(0, visibleCount);
 
 	const handleRowClick = (
 		row: T,
@@ -82,6 +66,23 @@ function Table<T extends { id: string | number }>({
 	const exportToPDF = () => {
 		window.print();
 	};
+	useEffect(() => {
+		const loader = loaderRef.current;
+		if (!loader) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, items.length));
+				}
+			},
+			{ threshold: 1 }
+		);
+
+		observer.observe(loader);
+
+		return () => observer.disconnect();
+	}, [items.length]);
 
 	return (
 		<>
@@ -114,15 +115,18 @@ function Table<T extends { id: string | number }>({
 						</Button>
 					</FilterButton>
 
-					<Button
-						type="button"
-						variant="ghost"
-						size="default"
-						className="cursor-pointer border px-5"
-						onClick={exportToPDF}
-					>
-						<Download className="w-4 h-4 mr-2" /> Экспорт PDF
-					</Button>
+					{title !== 'Роли и права' && (
+						<Button
+							type="button"
+							variant="ghost"
+							size="default"
+							className="cursor-pointer border px-5"
+							onClick={exportToPDF}
+						>
+							<Download className="w-4 h-4 mr-2" /> Экспорт PDF
+						</Button>
+					)}
+
 				</div>
 			</div>
 
@@ -143,7 +147,7 @@ function Table<T extends { id: string | number }>({
 						</thead>
 
 						<tbody>
-						{paginatedItems.map((row) => (
+						{visibleItems.map((row) => (
 							<tr
 								key={rowKey ? rowKey(row) : row.id}
 								className="border-b hover:bg-gray-200 hover:text-blue-600 cursor-pointer"
@@ -156,34 +160,27 @@ function Table<T extends { id: string | number }>({
 								))}
 							</tr>
 						))}
+
 						</tbody>
+
 					</table>
+					<div className="hidden print:flex flex-row justify-end mt-16 px-10 gap-20">
+						<div className="flex flex-col gap-2">
+							<span>Подпись</span>
+							<span>_________________________</span>
+						</div>
 
-					<div className="flex flex-row items-center justify-between mt-4 no-print">
-						<Button
-							type="button"
-							variant="outline"
-							size="default"
-							className="cursor-pointer border px-5"
-							disabled={activePage === 1}
-							onClick={prevPagePagination}
-						>
-							Назад
-						</Button>
-
-						<span>Страница {activePage} из {totalPages}</span>
-
-						<Button
-							type="button"
-							variant="outline"
-							size="default"
-							className="cursor-pointer border px-5"
-							disabled={activePage === totalPages}
-							onClick={nextPagePagination}
-						>
-							Вперед
-						</Button>
+						<div className="flex flex-col gap-2">
+							<span>Дата</span>
+							<span>_________________________</span>
+						</div>
 					</div>
+
+					{visibleCount < items.length && (
+						<div ref={loaderRef} className="h-10 flex items-center justify-center no-print">
+							Загрузка...
+						</div>
+					)}
 				</div>
 			)}
 		</>

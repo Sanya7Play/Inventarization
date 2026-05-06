@@ -8,7 +8,7 @@ import React, {
 	useMemo,
 } from "react";
 import type {
-	BackupRecord,
+	BackupRecord, Equipment,
 	Order,
 	Product,
 	ProductWithUser,
@@ -81,9 +81,7 @@ type AuthContextType = {
 	supplierDashboard: Supplier[];
 	usersDashboard: UserWithRole[];
 
-	formRoles: RoleWithUsers | undefined;
 	formTypes: TypeInventory | undefined;
-	setFormRoles: React.Dispatch<React.SetStateAction<RoleWithUsers | undefined>>;
 	setFormTypes: React.Dispatch<React.SetStateAction<TypeInventory | undefined>>;
 
 	fetchData: () => Promise<void>;
@@ -105,6 +103,7 @@ type AuthContextType = {
 	setRoles: React.Dispatch<React.SetStateAction<RoleWithUsers[]>>;
 	setTypes: React.Dispatch<React.SetStateAction<TypeInventory[]>>;
 
+
 	backups: BackupRecord[];
 	fetchBackups: () => Promise<void>;
 	createBackup: () => Promise<BackupRecord>;
@@ -114,6 +113,10 @@ type AuthContextType = {
 	downloadBackupById: (id: number) => Promise<void>;
 	loading: boolean;
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	equipment: Equipment[] | null;
+	setEquipment: React.Dispatch<React.SetStateAction<Equipment[]>>;
+	dot: boolean;
+	setDot: React.Dispatch<React.SetStateAction<boolean>>;
 
 };
 
@@ -144,9 +147,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [rolesSort, setRolesSort] = useState("id");
 
 	const [searchQuery, setSearchQuery] = useState("");
-	const [formRoles, setFormRoles] = useState<RoleWithUsers | undefined>();
 	const [formTypes, setFormTypes] = useState<TypeInventory | undefined>();
 	const [loading, setLoading] = useState(true);
+	const [equipment, setEquipment] = useState<Equipment[]>([]);
+	const [dot, setDot] = useState<boolean>(false);
 
 
 	useEffect(() => {
@@ -708,7 +712,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			render: (role: RoleStat) => (
 				<div className="flex gap-5">
 					{can("roles.update") && (
-						<EditDialogWindow role={role} setFormRoles={setFormRoles} formRoles={formRoles}>
+						<EditDialogWindow role={role}>
 							<Button variant="ghost" size="icon" className="flex justify-center px-2 py-1 cursor-pointer hover:text-black">
 								<Edit className="w-4 h-4" />
 							</Button>
@@ -844,6 +848,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				authUser,
 				loading,
 				setLoading,
+				equipment,
+				setEquipment,
+				dot,
+				setDot,
 
 				products,
 				suppliers,
@@ -876,8 +884,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				supplierDashboard,
 				usersDashboard,
 
-				formRoles,
-				setFormRoles,
 				formTypes,
 				setFormTypes,
 

@@ -1,13 +1,14 @@
 import { Input } from "@/components/ui/input.tsx";
-import { Bell, Search, X } from "lucide-react";
+import {Bell, Search, User2, X} from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
-import { Avatar, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Avatar } from "@/components/ui/avatar.tsx";
 import { useAuth } from "@/context/ContextProvider.tsx";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BellButton from "@/components/BellButton.tsx";
 
 function Header() {
-	const { searchQuery, setSearchQuery, globalSearchResults, authUser} = useAuth();
+	const { searchQuery, setSearchQuery, globalSearchResults, authUser, dot, setDot} = useAuth();
 	const navigate = useNavigate();
 	const [open, setOpen] = useState<boolean>(false);
 	const handleClear = () => {
@@ -80,25 +81,26 @@ function Header() {
 
 			<div className="flex flex-row items-center gap-8">
 				<div className="flex flex-row items-center gap-3">
-					<Button
-						variant="ghost"
-						size="lg"
-						className="cursor-pointer"
-					>
-						<Bell width={20} height={20} />
-					</Button>
+					<BellButton>
+						<Button
+							variant="ghost"
+							size="lg"
+							className="cursor-pointer hover:bg-blue-950/10 relative"
+							onClick={() => setDot(false)}
+						>
+							<Bell width={20} height={20} />
+							{dot && (<p className='absolute w-2 h-2 bg-red-500 top-1 right-1 rounded-full '></p>)}
+						</Button>
+					</BellButton>
 				</div>
 
 
 				<Avatar
 					size="lg"
-					className="cursor-pointer bg-neutral-200"
+					className="cursor-pointer bg-neutral-200 flex items-center justify-center"
 					onClick={() => navigate(`/users/${authUser?.id}`)}
 				>
-					<AvatarImage
-						src="/vite.svg"
-						alt="LogoSvg"
-					/>
+					<User2 strokeWidth='1' width='30' height='30' className='text-muted-foreground'/>
 				</Avatar>
 			</div>
 		</div>

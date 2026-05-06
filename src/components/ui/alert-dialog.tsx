@@ -150,7 +150,7 @@ function AlertDialogAction({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action> &
   Pick<React.ComponentProps<typeof Button>, "variant" | "size">) {
   return (
-    <Button variant={variant} size={size} asChild>
+    <Button variant={variant} size={size} asChild className='bg-blue-950 hover:bg-blue-950/80'>
       <AlertDialogPrimitive.Action
         data-slot="alert-dialog-action"
         className={cn(
