@@ -109,7 +109,10 @@ function PageProduct() {
 					variant="ghost"
 					size="default"
 					className="cursor-pointer border px-5"
-					onClick={() => navigate(`/${params.entity}`)}
+					onClick={() => {
+						console.log(params);
+						navigate(`/${params.entity}`)
+					}}
 				>
 					<ArrowLeft className="w-4 h-4" /> Назад
 				</Button>
